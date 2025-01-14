@@ -3,7 +3,7 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - "main"  
+      - "master"  
   release:
     types:
       - published 
@@ -18,21 +18,15 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
-
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
@@ -40,17 +34,20 @@ jobs:
           source: ./
           destination: ./_site
 
-      - name: Copy additional assets
+      - name: Clean _site directory
         run: |
-          mkdir -p ./_site/docs
+          sudo chmod -R 777 ./_site
+          find ./_site -type f -name "README.md" -delete
+
+      - name: Copy build output to _site/docs
+        run: |
+          sudo mkdir -p ./_site/docs
           cp -r ./build/* ./_site/docs/
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload combined output as GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
-
-
+          path: ./_site/docs
 
   deploy:
     environment:
